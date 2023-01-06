@@ -1,0 +1,15 @@
+<!-- index.template.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- 三花括号进行 HTML 不转义差值 -->
+  {{{ meta }}}
+  <!-- 双花括号进行 HTML 转义差值 -->
+  <title>{{ title }}</title>
+</head>
+<body>
+  <!-- 固定写法，服务度渲染的出口，Vue实例将替换下面的注释标签 -->
+  <!--vue-ssr-outlet-->
+</body>
+</html>
