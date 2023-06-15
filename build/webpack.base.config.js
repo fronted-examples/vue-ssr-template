@@ -1,64 +1,105 @@
-// webpack.base.config.js
 const path = require('path')
-const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const { VueLoaderPlugin } = require('vue-loader')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 
-const resolve = file => path.resolve(__dirname, file)
 const isProd = process.env.NODE_ENV === 'production'
 
-const devToolOption = {}
-
-if (!isProd) {
-  devToolOption.devtool = 'cheap-module-eval-source-map'
+function resolve (dir) {
+  return path.join(__dirname, '..', dir)
 }
 
 module.exports = {
   mode: isProd ? 'production' : 'development',
+  context: path.resolve(__dirname, '../'),
+  devtool: isProd ? 'source-map' : '#cheap-module-source-map',
   output: {
-    path: resolve('../dist/'),
+    path: path.resolve(__dirname, '../dist'),
     publicPath: '/dist/',
-    filename: '[name].[chunkhash].js'
+    // chunkhash 同属一个 chunk 中的文件修改了，文件名会发生变化
+    // contenthash 只有文件自己的内容变化了，文件名才会变化
+    filename: '[name].[contenthash].js',
+    // 此选项给打包后的非入口js文件命名，与 SplitChunksPlugin 配合使用
+    chunkFilename: '[name].[contenthash].js',
   },
   resolve: {
+    extensions: ['.js', '.vue', '.json', '.css'],
     alias: {
-      '@': resolve('../src/')
+      '@': resolve('src'),
     },
-    extensions: ['.js', '.vue', '.json']
   },
-  ...devToolOption,
+  performance: {
+    hints: 'warning',
+    //入口起点的最大体积
+    maxEntrypointSize: 50000000,
+    //生成文件的最大体积
+    maxAssetSize: 30000000,
+    //只给出 js 文件的性能提示
+    assetFilter: function (assetFilename) {
+      return assetFilename.endsWith('.js')
+    }
+  },
   module: {
+    // https://juejin.cn/post/6844903689103081485
+    // 使用 `mini-css-extract-plugin` 插件打包的的 `server bundle` 会使用到 document。
+    // 由于 node 环境中不存在 document 对象，所以报错。
+    // 解决方案：样式相关的 loader 不要放在 `webpack.base.config.js` 文件
+    // 将其分拆到 `webpack.client.config.js` 和 `webpack.client.server.js` 文件
+    // 其中 `mini-css-extract-plugin` 插件要放在 `webpack.client.config.js` 文件配置。
     rules: [
-      // 处理图片资源
       {
-        test: /\.(png|jpg|gif)$/i,
-        use: {
-          loader: 'url-loader',
-          options: {
-            limit: 8192
-          }
-        }
+        test: /\.vue$/,
+        loader: 'vue-loader',
+        options: {
+          compilerOptions: {
+            preserveWhitespace: false,
+          },
+        },
       },
-      // 处理字体资源 
-      { 
-        test: /\.(woff|woff2|eot|ttf|otf)$/, 
-        use: [ 'file-loader', ], 
+      {
+        test: /\.md$/,
+        use: [
+          { loader: 'html-loader' },
+          { loader: 'markdown-loader', options: {} }
+        ]
       },
-      // 处理 .vue 资源 
-      { 
-        test: /\.vue$/, 
-        loader: 'vue-loader' 
+      {
+        test: /\.(sc|c)ss$/,
+        use: [
+          // fallback to style-loader in development
+          isProd !== 'production' ? 'vue-style-loader' : {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              // 解决 export 'default' (imported as 'mod') was not found
+              // 启用 CommonJS 语法
+              esModule: false,
+            },
+          },
+          "css-loader",
+          "postcss-loader",
+          "sass-loader"
+        ]
       },
-      // 处理 CSS 资源 
-      // 它会应用到普通的 `.css` 文件 
-      // 以及 `.vue` 文件中的 `<style>` 块 
-      { 
-        test: /\.css$/, 
-        use: [ 'vue-style-loader', 'css-loader' ] 
-      }
-    ]
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.(png|svg|jpg|gif|ico)$/,
+        use: ['file-loader'],
+      },
+      {
+        test: /\.(woff|eot|ttf)\??.*$/,
+        loader: 'url-loader?name=fonts/[name].[md5:hash:hex:7].[ext]',
+      },
+    ],
   },
-  plugins: [ 
-    new VueLoaderPlugin(), 
-    new FriendlyErrorsWebpackPlugin() 
-  ]
+  plugins: [
+    new VueLoaderPlugin(),
+    new MiniCssExtractPlugin({
+      filename: 'style.css'
+    }),
+    new FriendlyErrorsWebpackPlugin()
+  ],
 }

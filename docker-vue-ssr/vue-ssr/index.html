@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- 公共内容 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link  rel="shortcut icon" href="/dist/static/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.5.0/build/styles/default.min.css" rel="external nofollow" >
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.css" rel="external nofollow" >
+    <!-- <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.5.0/build/highlight.min.js"></script> -->
+     <!-- 动态注入的内容 -->
+    {{{ meta.inject().title.text() }}}
+    {{{ meta.inject().meta.text() }}}
+    <style>
+      html, body {
+        padding: 0;
+        margin: 0;
+        min-width: 1200px;
+        background-color: #f2f3f5;
+      }
+    </style>
+</head>
+<body>
+    <!--vue-ssr-outlet-->
+</body>
+</html>

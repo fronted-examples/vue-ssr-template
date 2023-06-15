@@ -1,33 +1,36 @@
-// router/index.js
 import Vue from 'vue'
-import Router from 'vue-router'
-import Home from '@/pages/home.vue'
+import VueRouter from 'vue-router'
+// webpack中配置@指向src
+import Home from '@/views/Home'
 
-Vue.use(Router)
+Vue.use(VueRouter)
 
-export default function createRouter () {
-  return new Router({
-    mode: 'history', // 服务端大多不支持hash模式的路由，history模式的路由前后端支持更好
+export function createRouter () {
+  return new VueRouter({
+    // 同构应用不能使用 hash 路由，应该使用 history 模式，兼容前后端
+    mode: 'history',
     routes: [
       {
-        name: 'home',
         path: '/',
+        name: 'Home',
         component: Home
-      },
-      {
-        name: 'about',
+      }, {
         path: '/about',
-        component: () => import('@/pages/about.vue')
-      },
-      {
-        name: 'post',
-        path: '/post',
-        component: () => import('@/pages/post.vue')
-      },
-      {
-        name: '404',
+        name: 'About',
+        // 懒加载路由 按需加载，异步的
+        component: () => import('@/views/About')
+      }, {
+        path: '/posts',
+        name: 'Posts',
+        component: () => import('@/views/Post')
+      }, {
+        path: '/article/:articleId',
+        name: 'Article',
+        component: () => import('@/views/Article')
+      }, {
         path: '*',
-        component: () => import('@/pages/404.vue')
+        name: 'error404',
+        component: () => import('@/views/404')
       }
     ]
   })

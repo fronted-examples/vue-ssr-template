@@ -1,31 +1,35 @@
-// webpack.server.config.js
-const { merge } = require('webpack-merge')
-const nodeExternals = require('webpack-node-externals') 
+const webpack = require('webpack')
+const base = require('./webpack.base.config')
+const nodeExternals = require('webpack-node-externals') // Webpack allows you to define externals - modules that should not be bundled.
 const VueSSRServerPlugin = require('vue-server-renderer/server-plugin')
-const common = require('./webpack.base.config')
+const WebpackBar = require('webpackbar')
 
-const serverConfig = merge(common, {
-  entry: './src/entry-server.js', // 服务端打包入口
-  // 这允许 webpack 以 Node 适用方式处理模块加载 
-  // 并且还会在编译 Vue 组件时， 
-  // 告知 `vue-loader` 输送面向服务器代码(server-oriented code)。
+const { merge } = require('webpack-merge')
+
+const plugins = [
+  new webpack.DefinePlugin({
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+    'process.env.VUE_ENV': '"server"'
+  }),
+  new VueSSRServerPlugin()
+]
+
+if (process.env.NODE_ENV == 'production') {
+  plugins.push(
+    new WebpackBar()
+  )
+}
+
+module.exports = merge(base, {
   target: 'node',
+  devtool: '#source-map',
+  entry: './src/entry-server.js',
   output: {
     filename: 'server-bundle.js',
-    // 此处告知 server bundle 使用 Node 风格导出模块(Node-style exports) 
     libraryTarget: 'commonjs2'
   },
-  // 不打包 node_modules 第三方包，而是保留 require 方式直接加载 
-  externals: [
-    nodeExternals({ 
-      // 白名单中的资源依然正常打包 
-      allowlist: [/\.css$/] 
-    })
-  ], 
-  plugins: [ 
-    // 这是将服务器的整个输出构建为单个 JSON 文件的插件。 // 默认文件名为 `vue-ssr-server-bundle.json`
-    new VueSSRServerPlugin() 
-  ]
+  externals: nodeExternals({
+    allowlist: /\.css$/ // 防止将某些 import 的包(package)打包到 bundle 中，而是在运行时(runtime)再去从外部获取这些扩展依赖
+  }),
+  plugins
 })
-
-module.exports = serverConfig
