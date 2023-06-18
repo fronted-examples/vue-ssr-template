@@ -22,7 +22,10 @@ export default {
     content: {
       handler (newVal) {
         this.getMardownFileContent(newVal)
-        this.update()
+
+        if (process.env.VUE_ENV === 'client') {
+          this.update()
+        }
       },
       immediate: true
     }

@@ -4,6 +4,8 @@ import axios from 'axios'
 
 Vue.use(Vuex)
 
+import { getArticle } from '@/apis'
+
 export const createStore = () => {
   return new Vuex.Store({
     state: {
@@ -22,12 +24,13 @@ export const createStore = () => {
         commit('setPost', data.data)
       },
       async getArticle ({ commit }) {
-        const { data } = await axios.get('http://localhost:8088/user-management-service/article/getArticleByArticleId?articleId=1')
+        const params = {
+          articleId: 1
+        }
+        const { code, data } = await getArticle(params)
 
-        if (data.code === 200) {
-
-
-          commit('getArticle', data.data)
+        if (code === 200) {
+          commit('getArticle', data)
         }
       }
     },

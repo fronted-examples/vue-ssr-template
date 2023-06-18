@@ -1,4 +1,5 @@
 const path = require('path')
+const webpack = require('webpack')
 const { VueLoaderPlugin } = require('vue-loader')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
@@ -96,6 +97,9 @@ module.exports = {
     ],
   },
   plugins: [
+    new webpack.DefinePlugin({
+      'process.env': isProd ? require('../config/prod.env') : require('../config/dev.env')
+    }),
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({
       filename: 'style.css'

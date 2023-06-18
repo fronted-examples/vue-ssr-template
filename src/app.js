@@ -2,11 +2,16 @@
 import Vue from 'vue'
 import App from './App.vue'
 import VueMeta from 'vue-meta'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+
 import { createRouter } from './router'
 import { createStore } from './store/index'
 
+
 // 注册插件
 Vue.use(VueMeta)
+Vue.use(ElementUI)
 
 
 // 导出一个工厂函数，用于创建新的

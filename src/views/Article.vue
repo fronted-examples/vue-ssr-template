@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import MarkdownPreview from '@/components/MarkdownPreview'
 
 export default {
