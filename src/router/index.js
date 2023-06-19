@@ -11,24 +11,24 @@ export function createRouter () {
     mode: 'history',
     routes: [
       {
-        path: '/',
+        path: '/mall',
         name: 'Home',
         component: Home
       }, {
-        path: '/about',
+        path: '/mall/about',
         name: 'About',
         // 懒加载路由 按需加载，异步的
         component: () => import('@/views/About')
       }, {
-        path: '/posts',
+        path: '/mall/posts',
         name: 'Posts',
         component: () => import('@/views/Post')
       }, {
-        path: '/article/:articleId',
+        path: '/mall/article/:articleId',
         name: 'Article',
         component: () => import('@/views/Article')
       }, {
-        path: '*',
+        path: '/mall/*',
         name: 'error404',
         component: () => import('@/views/404')
       }
