@@ -1,7 +1,7 @@
 const path = require('path')
 const webpack = require('webpack')
 const { VueLoaderPlugin } = require('vue-loader')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const ExtractCssChunksPlugin = require('extract-css-chunks-webpack-plugin')
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 
 const isProd = process.env.NODE_ENV === 'production'
@@ -41,12 +41,14 @@ module.exports = {
     }
   },
   module: {
-    // https://juejin.cn/post/6844903689103081485
-    // 使用 `mini-css-extract-plugin` 插件打包的的 `server bundle` 会使用到 document。
-    // 由于 node 环境中不存在 document 对象，所以报错。
-    // 解决方案：样式相关的 loader 不要放在 `webpack.base.config.js` 文件
-    // 将其分拆到 `webpack.client.config.js` 和 `webpack.client.server.js` 文件
-    // 其中 `mini-css-extract-plugin` 插件要放在 `webpack.client.config.js` 文件配置。
+    /**
+     * https://juejin.cn/post/6844903689103081485
+     * 使用 `mini-css-extract-plugin` 插件打包的的 `server bundle` 会使用到 document。
+     * 由于 node 环境中不存在 document 对象，所以报错。
+     * 解决方案：样式相关的 loader 不要放在 `webpack.base.config.js` 文件
+     * 将其分拆到 `webpack.client.config.js` 和 `webpack.client.server.js` 文件
+     * 其中 `mini-css-extract-plugin` 插件要放在 `webpack.client.config.js` 文件配置。
+     */
     rules: [
       {
         test: /\.vue$/,
@@ -67,18 +69,16 @@ module.exports = {
       {
         test: /\.(sc|c)ss$/,
         use: [
-          // fallback to style-loader in development
-          isProd !== 'production' ? 'vue-style-loader' : {
-            loader: MiniCssExtractPlugin.loader,
+          {
+            loader: ExtractCssChunksPlugin.loader,
             options: {
-              // 解决 export 'default' (imported as 'mod') was not found
-              // 启用 CommonJS 语法
-              esModule: false,
-            },
+              hot: !isProd,
+              reloadAll: !isProd
+            }
           },
-          "css-loader",
-          "postcss-loader",
-          "sass-loader"
+          'css-loader',
+          'postcss-loader',
+          'sass-loader'
         ]
       },
       {
@@ -101,8 +101,9 @@ module.exports = {
       'process.env': isProd ? require('../config/prod.env') : require('../config/dev.env')
     }),
     new VueLoaderPlugin(),
-    new MiniCssExtractPlugin({
-      filename: 'style.css'
+    new ExtractCssChunksPlugin({
+      filename: isProd ? 'css/[name].[contenthash:8].css' : '[name].[contenthash:8].css',
+      chunkFilename: isProd ? 'css/[name].[contenthash:8].[chunkhash:7].css' : '[name].[contenthash:8].[chunkhash:7].css'
     }),
     new FriendlyErrorsWebpackPlugin()
   ],

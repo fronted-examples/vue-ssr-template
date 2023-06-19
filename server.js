@@ -55,7 +55,7 @@ const render = async (request, response) => {
     response.end(html)
   } catch (error) {
     console.log('err: ', error)
-    res.status(500).end('Internal Server Error')
+    response.status(500).end('Internal Server Error')
   }
 }
 
